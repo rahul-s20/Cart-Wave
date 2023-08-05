@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, make_response, jsonify
 from controllers.user_controller import user_register, user_login, get_single_user_details, \
-    get_all_users, fetch_current_user
+    get_all_users, fetch_current_user, update_user_privilege
 from utils.tokenization import token_required
 
 user_blueprint = Blueprint('user_blueprint', __name__, url_prefix='/auth')
@@ -40,4 +40,15 @@ def users():
 @token_required
 def auth_profile():
     res = fetch_current_user(token=request.headers.get('Authorization'))
+    return res
+
+
+@user_blueprint.route('/users', methods=['PUT'])
+@token_required
+def users_put():
+    content = request.get_json(silent=True)
+    res = update_user_privilege(token=request.headers.get('Authorization'),
+                                user_id_update=request.args.get('id'), privilege=content['privilege'])
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(res)
     return res

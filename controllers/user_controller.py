@@ -92,3 +92,49 @@ def fetch_current_user(token):
             return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
     else:
         return make_response(jsonify({'success': False, 'data': "Invalid Token"}), 400)
+
+
+def update_user_privilege(token: str, user_id_update: str, privilege: str):
+    try:
+        curr_users_prv, _id = check_user_privilege(token=token)
+        if curr_users_prv == 'super':
+            if user_id_update is None:
+                return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
+            elif privilege is None:
+                return make_response(jsonify({'success': False, 'data': "Invalid: no data provided"}), 400)
+            elif privilege not in ['super', 'moderate', 'low']:
+                return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+            elif _id == user_id_update:
+                return make_response(jsonify({'success': False, 'data': "Cannot change privilege for self"}), 400)
+            else:
+                find_user_u = Users.objects.filter(Q(id=ObjectId(user_id_update)) & Q(is_active=True)).first()
+                if find_user_u is None:
+                    return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
+                else:
+                    find_user_u.privilege = privilege
+                    find_user_u.save()
+                    return make_response(jsonify({'success': True, 'data': {
+                        'id': str(find_user_u.id),
+                        'email': find_user_u.email,
+                        'name': find_user_u.name,
+                        'privilege': find_user_u.privilege,
+                        'verified': find_user_u.verified,
+                        'is_active': find_user_u.is_active
+                    }}), 200)
+        else:
+            return make_response(jsonify({'success': False, 'data': "You are not authorized to update any privilege"}), 400)
+    except Exception as er:
+        print(er)
+        return make_response(jsonify({'success': False, 'data': "Something went wrong"}), 500)
+
+
+def check_user_privilege(token):
+    decoded_user = decode_token(token)
+    if decoded_user:
+        find_user = Users.objects.filter(Q(id=ObjectId(decoded_user['sub'])) and Q(is_active=True)).first()
+        if find_user:
+            return find_user['privilege'], decoded_user['sub']
+        else:
+            raise ValueError('User does not exists')
+    else:
+        raise ValueError("Invalid Token")
