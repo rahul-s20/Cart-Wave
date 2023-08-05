@@ -49,6 +49,11 @@ def users_put():
     content = request.get_json(silent=True)
     res = update_user_privilege(token=request.headers.get('Authorization'),
                                 user_id_update=request.args.get('id'), privilege=content['privilege'])
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(res)
+    return res
+
+
+@user_blueprint.route('/users', methods=['DELETE'])
+@token_required
+def users_delete():
+    res = update_user_privilege(token=request.headers.get('Authorization'), user_id_update=request.args.get('id'))
     return res

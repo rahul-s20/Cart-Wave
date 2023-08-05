@@ -122,7 +122,32 @@ def update_user_privilege(token: str, user_id_update: str, privilege: str):
                         'is_active': find_user_u.is_active
                     }}), 200)
         else:
-            return make_response(jsonify({'success': False, 'data': "You are not authorized to update any privilege"}), 400)
+            return make_response(jsonify({'success': False, 'data': "You are not authorized to update any privilege"}),
+                                 400)
+    except Exception as er:
+        print(er)
+        return make_response(jsonify({'success': False, 'data': "Something went wrong"}), 500)
+
+
+def delete_user_by_admin(token: str, user_id_update: str):
+    try:
+        curr_users_prv, _id = check_user_privilege(token=token)
+        if curr_users_prv == 'super':
+            if user_id_update is None:
+                return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
+            elif _id == user_id_update:
+                return make_response(jsonify({'success': False, 'data': "Cannot delete yourself"}), 400)
+            else:
+                find_user_u = Users.objects.filter(Q(id=ObjectId(user_id_update)) & Q(is_active=True)).first()
+                if find_user_u is None:
+                    return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
+                else:
+                    find_user_u.is_active = False
+                    find_user_u.save()
+                    return make_response(jsonify({'success': True, 'data': 'User deleted'}), 200)
+        else:
+            return make_response(jsonify({'success': False, 'data': "You are not authorized to update any user"}),
+                                 400)
     except Exception as er:
         print(er)
         return make_response(jsonify({'success': False, 'data': "Something went wrong"}), 500)
