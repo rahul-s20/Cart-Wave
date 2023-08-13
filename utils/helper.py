@@ -22,3 +22,8 @@ def filter_objects(obj, fields: set):
 def current_date() -> str:
     dt = datetime.now().strftime('%m%d%Y')
     return dt
+
+
+def current_date_time() -> str:
+    dt = datetime.now().strftime('%m%d%Y_%H%M%S')
+    return dt

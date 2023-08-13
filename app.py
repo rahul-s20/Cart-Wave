@@ -19,7 +19,10 @@ def create_app(env='Development'):
     db.init_app(app)
 
     from routes.user_route import user_blueprint
+    from routes.product_route import product_blueprint
 
     app.register_blueprint(user_blueprint)
+    app.register_blueprint(product_blueprint)
+    print("App started")
 
     return app

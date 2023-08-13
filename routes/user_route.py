@@ -21,6 +21,7 @@ def auth_test():
 
 @user_blueprint.route('/login', methods=['POST'])
 def login():
+    print("login...........")
     content = request.get_json(silent=True)
     res = user_login(data=content)
     return res

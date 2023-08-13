@@ -1,9 +1,10 @@
 import os
+from os import environ as env
 
 
 class Config(object):
     DEBUG = False
-    MONGODB_HOST = "mongodb://localhost:27017/cart_wave_dev"
+    MONGODB_HOST = env['MONGODB_URI']
 
     # Intent Classifier model details
     # MODELS_DIR = "model_files/"

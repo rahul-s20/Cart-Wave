@@ -1,5 +1,5 @@
 from mongoengine import Document, StringField, BooleanField
-from utils.date_time import current_date
+from utils.helper import current_date
 
 
 class Users(Document):
