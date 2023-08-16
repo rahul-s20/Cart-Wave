@@ -30,30 +30,43 @@ def create_new_product():
     return res
 
 
-@product_blueprint.route('/<product_id>', methods=['PUT'])
+@product_blueprint.route('/<product_id>', methods=['PUT', 'DELETE'])
 @token_required
 def update_product(product_id):
-    content = request.get_json(silent=True)
-    if content:
-        filtered_data = filter_objects(content,
-                                       {"name", "description", "price", "colors", "sizes", "company", "category",
-                                        "stock",
-                                        "images", "is_active"})
-        res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
-                                       data=filtered_data)
-    else:
-        parameters = request.form.to_dict()
-        filtered_data = filter_objects(parameters,
-                                       {"name", "description", "price", "colors", "sizes", "company", "category",
-                                        "stock",
-                                        "images", "is_active"})
-        if request.files.getlist('images'):
-            filtered_data["images"] = request.files.getlist('images')
+    if request.method == 'PUT':
+        content = request.get_json(silent=True)
+        if content:
+            filtered_data = filter_objects(content,
+                                           {"name", "description", "price", "colors", "sizes", "company", "category",
+                                            "stock",
+                                            "images", "is_active"})
+            res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
+                                           data=filtered_data)
         else:
-            filtered_data["images"] = None
-        res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
-                                       data=filtered_data)
-    return res
+            parameters = request.form.to_dict()
+            filtered_data = filter_objects(parameters,
+                                           {"name", "description", "price", "colors", "sizes", "company", "category",
+                                            "stock",
+                                            "images", "is_active"})
+            if request.files.getlist('images'):
+                filtered_data["images"] = request.files.getlist('images')
+            else:
+                filtered_data["images"] = None
+            res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
+                                           data=filtered_data)
+        return res
+    elif request.method == 'DELETE':
+        content = request.get_json(silent=True)
+        if content:
+            filtered_data = filter_objects(content, {"is_active"})
+            res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
+                                           data=filtered_data)
+        else:
+            parameters = request.form.to_dict()
+            filtered_data = filter_objects(parameters, {"is_active"})
+            res = product_c.update_product(prd_id=product_id, token=request.headers.get('Authorization'),
+                                           data=filtered_data)
+        return res
 
 
 @product_blueprint.route('/status/<product_id>', methods=['PUT'])
