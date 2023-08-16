@@ -14,3 +14,19 @@
 #
 #
 # print(run_auth())
+
+a = {
+    "name": "Rahul",
+    "age": 28,
+    "location": "BLR"
+}
+
+b = {
+    "name": "Rahul",
+    "age": 28,
+    "location": "LONDON"
+}
+
+shared_items = {k: a[k] for k in a if k in b and a[k] != b[k]}
+
+print(shared_items)

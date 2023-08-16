@@ -53,13 +53,8 @@ class S3_Io:
             else:
                 ext = get_file_extension(files.filename)
                 files.filename = f"{uid}_{current_date_time()}"
-                print("tttttttttttttttttttttttttttttttttttttttttt -", ext)
-                print(files.filename)
-                print("sssssssssssssssssssssssssssssssssssssssss")
-                print(dir(files))
                 s3bucket.put_object(Key=f'{key}/{files.filename}.{ext}', Body=files.stream, ACL='public-read',
                                     ContentType="image", ContentDisposition='inline')
-                print('uuuuuuuuuuuuuuuuuuuuuuuuu' )
                 key_loc.append(f'{key}/{files.filename}.{ext}')
             all_keys = [f"{base_url + i}" for i in key_loc]
             return all_keys

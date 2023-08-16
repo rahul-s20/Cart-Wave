@@ -1,5 +1,12 @@
 import bcrypt
 from datetime import datetime
+from mongoengine.fields import EmbeddedDocumentField
+from mongoengine.fields import EmbeddedDocumentListField
+from mongoengine.fields import GenericEmbeddedDocumentField
+from mongoengine.fields import GenericReferenceField
+from mongoengine.fields import ListField
+from mongoengine.fields import ReferenceField
+from mongoengine.fields import SortedListField
 
 
 def hashing(content: str):
@@ -12,11 +19,19 @@ def check_hash(content: str, hashed_content: str) -> bool:
     return bcrypt.checkpw(bytes(content, 'utf-8'), bytes(hashed_content, 'utf-8'))
 
 
-def filter_objects(obj, fields: set):
+def filter_objects_strict(obj, fields: set):
     if all(name in obj for name in fields):
         return obj
     else:
         raise ValueError("Keys are not matching")
+
+
+def filter_objects(obj, fields: set):
+    name = ""
+    if any(name in obj for name in fields):
+        return obj
+    else:
+        raise ValueError(f"Invalid Keys are being passed {name}")
 
 
 def current_date() -> str:

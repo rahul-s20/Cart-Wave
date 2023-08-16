@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, make_response, jsonify
 from controllers.user_controller import user_register, user_login, get_single_user_details, \
-    get_all_users, fetch_current_user, update_user_privilege
+    get_all_users, fetch_current_user, update_user_privilege, delete_user_by_admin
 from utils.tokenization import token_required
 
 user_blueprint = Blueprint('user_blueprint', __name__, url_prefix='/auth')
@@ -56,5 +56,5 @@ def users_put():
 @user_blueprint.route('/users', methods=['DELETE'])
 @token_required
 def users_delete():
-    res = update_user_privilege(token=request.headers.get('Authorization'), user_id_update=request.args.get('id'))
+    res = delete_user_by_admin(token=request.headers.get('Authorization'), user_id_update=request.args.get('id'))
     return res

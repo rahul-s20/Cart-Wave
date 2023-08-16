@@ -1,6 +1,6 @@
 from flask import jsonify, make_response, request, Response
 from models.users import Users
-from utils.helper import filter_objects
+from utils.helper import filter_objects_strict
 from utils.helper import hashing, check_hash
 from utils.tokenization import encode_token, decode_token
 from bson import ObjectId
@@ -9,7 +9,7 @@ from mongoengine import Q
 
 def user_register(data: dict):
     user_model = Users()
-    filtered_data = filter_objects(data, {'email', 'name', 'password'})
+    filtered_data = filter_objects_strict(data, {'email', 'name', 'password'})
     find_one = Users.objects.filter(email=filtered_data['email']).first()
 
     if find_one:
@@ -31,7 +31,7 @@ def user_register(data: dict):
 
 
 def user_login(data: dict):
-    filtered_data = filter_objects(data, {'email', 'password'})
+    filtered_data = filter_objects_strict(data, {'email', 'password'})
     find_one = Users.objects.filter(email=filtered_data['email']).first()
 
     if find_one:
