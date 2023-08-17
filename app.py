@@ -5,6 +5,7 @@ from flask_mongoengine import MongoEngine
 
 from routes.user_route import user_blueprint
 from routes.product_route import product_blueprint
+from routes.order_route import order_blueprint
 
 db = MongoEngine()
 
@@ -23,6 +24,7 @@ def create_app(env='Development'):
 
     app.register_blueprint(user_blueprint)
     app.register_blueprint(product_blueprint)
+    app.register_blueprint(order_blueprint)
     print("App started")
 
     return app

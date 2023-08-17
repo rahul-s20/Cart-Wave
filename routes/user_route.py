@@ -47,6 +47,7 @@ def auth_profile():
 @user_blueprint.route('/users', methods=['PUT'])
 @token_required
 def users_put():
+    # request.args.get('id')
     content = request.get_json(silent=True)
     res = update_user_privilege(token=request.headers.get('Authorization'),
                                 user_id_update=request.args.get('id'), privilege=content['privilege'])

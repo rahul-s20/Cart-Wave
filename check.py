@@ -1,32 +1,40 @@
-# # a = (1, 2, 3)
-# # b = {email: "rahulsarkar334@gmail.com"}
+# # # a = (1, 2, 3)
+# # # b = {email: "rahulsarkar334@gmail.com"}
+# # #
+# # # print(b.email)
 # #
-# # print(b.email)
+# # from utils.tokenization import encode_token, token_required
+# #
+# #
+# # # x = encode_token(user_id='12345')
+# #
+# # @token_required
+# # def run_auth():
+# #     print("Access Granted")
+# #
+# #
+# # print(run_auth())
 #
-# from utils.tokenization import encode_token, token_required
+# a = {
+#     "name": "Rahul",
+#     "age": 28,
+#     "location": "BLR"
+# }
 #
+# b = {
+#     "name": "Rahul",
+#     "age": 28,
+#     "location": "LONDON"
+# }
 #
-# # x = encode_token(user_id='12345')
+# shared_items = {k: a[k] for k in a if k in b and a[k] != b[k]}
 #
-# @token_required
-# def run_auth():
-#     print("Access Granted")
-#
-#
-# print(run_auth())
+# print(shared_items)
+# a =1
 
-a = {
-    "name": "Rahul",
-    "age": 28,
-    "location": "BLR"
-}
+def chel():
+    global a
+    a = 13
+chel()
 
-b = {
-    "name": "Rahul",
-    "age": 28,
-    "location": "LONDON"
-}
-
-shared_items = {k: a[k] for k in a if k in b and a[k] != b[k]}
-
-print(shared_items)
+print(a)
