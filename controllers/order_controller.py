@@ -47,3 +47,13 @@ def create_order(data: dict):
         return make_response(jsonify({'success': True, 'data': "Order created successfully"}), 200)
     except Exception as er:
         return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
+
+
+def get_all_orders(token: str):
+    curr_users_prv, _id = check_user_privilege(token=token)
+
+    if curr_users_prv == 'super':
+        all_orders = Orders.objects()
+        return make_response(jsonify({'success': True, 'data': all_orders}), 200)
+    else:
+        return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
