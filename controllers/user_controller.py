@@ -1,10 +1,11 @@
 from flask import jsonify, make_response, request, Response
 from models.users import Users
 from utils.helper import filter_objects_strict
-from utils.helper import hashing, check_hash
+from utils.helper import hashing, check_hash, cookie_expiration_set
 from utils.tokenization import encode_token, decode_token
 from bson import ObjectId
 from mongoengine import Q
+import datetime
 
 
 def user_register(data: dict):
@@ -45,7 +46,8 @@ def user_login(data: dict):
                 "privilege": find_one.privilege,
                 'token': token
             }}), 200)
-            response.set_cookie('token', token)
+            response.set_cookie('token', token, expires=cookie_expiration_set(), domain=None,
+                                secure=True, httponly=True, samesite='none')
             return response
         else:
             return make_response(jsonify({'success': False, 'data': "Invalid password"}), 401)
@@ -86,7 +88,8 @@ def fetch_current_user(token):
                 "privilege": find_user.privilege,
                 'token': token
             }}), 200)
-            response.set_cookie('token', token)
+            response.set_cookie('token', token, expires=cookie_expiration_set(), domain=None,
+                                secure=True, httponly=True, samesite='none')
             return response
         else:
             return make_response(jsonify({'success': False, 'data': "User not found"}), 400)
@@ -151,6 +154,13 @@ def delete_user_by_admin(token: str, user_id_update: str):
     except Exception as er:
         print(er)
         return make_response(jsonify({'success': False, 'data': "Something went wrong"}), 500)
+
+
+def logout_user():
+    response = make_response(jsonify({'success': True, 'message': 'Logged Out'}), 200)
+    response.set_cookie('token', None, expires=datetime.datetime.now(), domain=None,
+                        secure=True, httponly=True, samesite='none')
+    return response
 
 
 def check_user_privilege(token):

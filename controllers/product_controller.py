@@ -97,3 +97,16 @@ class ProductC:
                 return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
         except Exception as er:
             return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
+
+
+def fetch_all_products(token: str):
+    curr_users_prv, _id = check_user_privilege(token=token)
+
+    if curr_users_prv == 'super':
+        all_prd = Products.objects()
+        return make_response(jsonify({'success': True, 'data': all_prd}), 200)
+    elif curr_users_prv in ['moderate', 'low']:
+        all_prd = Products.objects(is_active=True)
+        return make_response(jsonify({'success': True, 'data': all_prd}), 200)
+    else:
+        return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)

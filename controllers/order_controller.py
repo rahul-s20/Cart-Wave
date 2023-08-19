@@ -57,3 +57,16 @@ def get_all_orders(token: str):
         return make_response(jsonify({'success': True, 'data': all_orders}), 200)
     else:
         return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+
+
+def get_single_order(order_id: str, token: str):
+    curr_users_prv, _id = check_user_privilege(token=token)
+
+    if curr_users_prv == 'super':
+        all_order = Orders.objects.filter(id=ObjectId(order_id)).first()
+        return make_response(jsonify({'success': True, 'data': all_order}), 200)
+    elif curr_users_prv in ['moderate', 'low']:
+        all_order = Orders.objects.filter(Q(id=ObjectId(order_id)) & Q(is_active=True)).first()
+        return make_response(jsonify({'success': True, 'data': all_order}), 200)
+    else:
+        return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)

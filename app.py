@@ -12,19 +12,19 @@ db = MongoEngine()
 
 def create_app(env='Development'):
     app = Flask(__name__)
-    CORS(app)
-    # app.config['MONGODB_SETTINGS'] = {
-    #     'db': 'cart_wave_de',
-    #     'host': '0.0.0.0',
-    #     'port': 27017
-    # }
-    app.config.from_object('configuration.config.%s' % env)
 
+    api_v1_cors_config = {
+        "origins": ["*"],
+        "methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["*"]
+    }
+    app.config.from_object('configuration.config.%s' % env)
     db.init_app(app)
 
     app.register_blueprint(user_blueprint)
     app.register_blueprint(product_blueprint)
     app.register_blueprint(order_blueprint)
+    CORS(app, resources={r'*': api_v1_cors_config}, support_credentials=True)
     print("App started")
 
     return app

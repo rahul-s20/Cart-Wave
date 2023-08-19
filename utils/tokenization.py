@@ -9,7 +9,10 @@ def token_required(func):
     # decorator factory which invoks update_wrapper() method and passes decorated function as an argument
     @wraps(func)
     def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
+        if request.headers.get('Authorization'):
+            token = request.headers.get('Authorization')
+        else:
+            token = request.cookies.get('token')
         if not token:
             return jsonify({'Alert!': 'Token is missing!'}), 401
         try:
