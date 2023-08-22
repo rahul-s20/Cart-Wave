@@ -35,7 +35,6 @@ def register():
 
 @user_blueprint.route('/logout', methods=['GET'])
 @token_required
-@cross_origin(origin=["*"], supports_credentials=True)
 def logout():
     res = logout_user()
     return res
@@ -49,11 +48,14 @@ def auth_test():
 
 @user_blueprint.route('/users', methods=['GET'])
 @token_required
+@cross_origin(origin=["*"], supports_credentials=True)
 def users():
+    token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
+        'token')
     if request.args.get('id'):
         res = get_single_user_details(_id=request.args.get('id'))
     else:
-        res = get_all_users(token=request.headers.get('Authorization'))
+        res = get_all_users(token=token)
     return res
 
 

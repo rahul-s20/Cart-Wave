@@ -35,7 +35,7 @@ class PaymentInformation(EmbeddedDocument):
 class Orders(Document):
     shippingInfo = EmbeddedDocumentField(ShippingInformation)
     orderItems = ListField(EmbeddedDocumentField(Items))
-    user = EmbeddedDocumentField(PaymentInformation)
+    user = EmbeddedDocumentField(User, required=True)
     paymentInfo = EmbeddedDocumentField(PaymentInformation)
     paidAt = StringField(required=True, default=current_date_time())
     itemsPrice = FloatField(required=True)

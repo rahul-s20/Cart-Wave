@@ -17,7 +17,6 @@ class ProductC:
 
     def create_product(self, data: dict, token, files=None):
         img_list = list()
-        image_obj = Image()
         try:
             decoded_token = decode_token(token=token)
             if files:
@@ -26,24 +25,22 @@ class ProductC:
                                                     base_url=env['OBJECT_BASE_URL'])
 
             else:
-                all_keys = self.s3_obj.upload_files(uid=decoded_token['sub'], files=data['images'],
+                all_keys = self.s3_obj.upload_files_from_str(uid=decoded_token['sub'], files=data['images'],
                                                     key='CART_WAVE_DEV/PRODUCTS',
                                                     bucket_name=env['BUCKET'],
                                                     base_url=env['OBJECT_BASE_URL'])
             for i in all_keys:
-                image_obj.public_id = i.split('/')[-1].replace('.', '')
-                image_obj.url = i
-                img_list.append(image_obj)
-
+                objt = Image(public_id=i.split('/')[-1], url=i)
+                img_list.append(objt)
             if len(img_list) > 0:
                 self.product_model.images = img_list
 
             for key, value in data.items():
                 if key == "colors":
-                    value = value.split(',')
+                    value = value.split(',') if isinstance(value, str) else value
                     setattr(self.product_model, key, value)
                 elif key == "sizes":
-                    value = value.split(',')
+                    value = value.split(',') if isinstance(value, str) else value
                     setattr(self.product_model, key, value)
                 elif key == "price":
                     value = float(value)
@@ -54,7 +51,9 @@ class ProductC:
             self.product_model.save()
             return make_response(jsonify({'success': True, 'data': "Product created successfully"}), 200)
         except Exception as er:
-            return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            raise er
+            # return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
 
     def update_product(self, prd_id: str, token: str, data: dict):
         img_list = list()
@@ -101,12 +100,31 @@ class ProductC:
 
 def fetch_all_products(token: str):
     curr_users_prv, _id = check_user_privilege(token=token)
+    list_prods = list()
 
     if curr_users_prv == 'super':
         all_prd = Products.objects()
-        return make_response(jsonify({'success': True, 'data': all_prd}), 200)
     elif curr_users_prv in ['moderate', 'low']:
         all_prd = Products.objects(is_active=True)
-        return make_response(jsonify({'success': True, 'data': all_prd}), 200)
     else:
         return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+
+
+    if len(all_prd)>0:
+        for i in all_prd:
+            list_prods.append({
+                "id": str(i.id),
+                "name": i.name,
+                "price": i.price,
+                "image": i.images[0].url,
+                "colors": i.colors,
+                "company": i.company,
+                "description": i.description,
+                "category": i.category,
+                "stock": i.stock,
+                "shipping": i.shipping,
+                "featured": i.featured,
+
+            })
+
+    return make_response(jsonify({'success': True, 'data': list_prods}), 200)

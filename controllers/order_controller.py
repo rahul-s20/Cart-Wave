@@ -43,20 +43,29 @@ def create_order(data: dict):
             oder_obj.orderItems = items_list
         oder_obj.shippingInfo = shipping_obj
         oder_obj.paymentInfo = payment_obj
+        oder_obj.user = user_obj
         oder_obj.save()
         return make_response(jsonify({'success': True, 'data': "Order created successfully"}), 200)
     except Exception as er:
         return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
 
 
-def get_all_orders(token: str):
+def get_all_orders(token: str, data: dict = None):
     curr_users_prv, _id = check_user_privilege(token=token)
-
-    if curr_users_prv == 'super':
-        all_orders = Orders.objects()
-        return make_response(jsonify({'success': True, 'data': all_orders}), 200)
+    if data is None:
+        if curr_users_prv == 'super':
+            all_orders = Orders.objects()
+            return make_response(jsonify({'success': True, 'data': all_orders}), 200)
+        else:
+            return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+    elif data.__contains__('email'):
+        if curr_users_prv == 'super':
+            all_orders = Orders.objects(user__email=data['email'])
+            return make_response(jsonify({'success': True, 'data': all_orders}), 200)
+        else:
+            return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
     else:
-        return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+        return make_response(jsonify({'success': False, 'data': "Invalid input"}), 400)
 
 
 def get_single_order(order_id: str, token: str):

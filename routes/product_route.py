@@ -4,13 +4,15 @@ from utils.tokenization import token_required
 from utils.helper import filter_objects
 from flask_cors import cross_origin
 from controllers.user_controller import fetch_current_user
+from utils.helper import crossdomain
 
 product_c = ProductC()
 
 product_blueprint = Blueprint('product_blueprint', __name__, url_prefix='/api/v1/product')
 
 
-@product_blueprint.route('/new', methods=['POST'])
+@product_blueprint.route('/new', methods=['POST', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 @token_required
 def create_new_product():
     content = request.get_json(silent=True)

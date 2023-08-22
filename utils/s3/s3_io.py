@@ -1,8 +1,8 @@
 import boto3
 from botocore.client import Config
-from datetime import datetime
 import os
 from utils.helper import current_date_time
+import base64
 
 REQUIRED_ENVS = ['ACCESS_KEY', 'SECRET_KEY', 'REGION']
 
@@ -39,24 +39,51 @@ class S3_Io:
                                                 region_name=REGION)
 
     def upload_files(self, uid: str, files, key: str, bucket_name: str, base_url: str = ''):
-        key_loc, all_keys = list(), ''
+        key_loc, all_keys, cnt = list(), '', 0
         try:
             s3bucket = self.__s3_resource.Bucket(bucket_name)
             if type(files) is list:
                 if len(files) > 0:
                     for file in files:
                         ext = get_file_extension(file.filename)
-                        file.filename = f"{uid}_{datetime.now().timestamp()}"
+                        file.filename = f"{uid}_{current_date_time()}_{cnt}"
                         s3bucket.put_object(Key=f'{key}/{file.filename}.{ext}', Body=file.stream, ACL='public-read',
                                             ContentType="image", ContentDisposition='inline')
-                        key_loc.append(f'{key}/{file.filename}.{ext}')
+                        key_loc.append(f'{file.filename}.{ext}')
+                        cnt += 1
             else:
                 ext = get_file_extension(files.filename)
                 files.filename = f"{uid}_{current_date_time()}"
                 s3bucket.put_object(Key=f'{key}/{files.filename}.{ext}', Body=files.stream, ACL='public-read',
                                     ContentType="image", ContentDisposition='inline')
-                key_loc.append(f'{key}/{files.filename}.{ext}')
-            all_keys = [f"{base_url + i}" for i in key_loc]
+                key_loc.append(f'{files.filename}.{ext}')
+            all_keys = [f"{base_url}{i}" for i in key_loc]
+            return all_keys
+        except Exception as er:
+            print(f"Upload not working: {er}")
+            raise er
+
+    def upload_files_from_str(self, uid: str, files, key: str, bucket_name: str, base_url: str = ''):
+        key_loc, all_keys, cnt = list(), '', 0
+        try:
+            s3bucket = self.__s3_resource.Bucket(bucket_name)
+            if type(files) is list:
+                if len(files) > 0:
+                    for file in files:
+                        file = base64.b64decode(file.replace('data:image/jpeg;base64', ''))
+                        filename = f"{uid}_{current_date_time()}_{cnt}"
+                        s3bucket.put_object(Key=f'{key}/{filename}.jpg', Body=file, ContentType='image/jpeg',
+                                            ContentDisposition='inline', ACL='public-read')
+                        key_loc.append(f'{filename}.jpg')
+                        cnt += 1
+            else:
+                files = base64.b64decode(files.replace('data:image/jpeg;base64', ''))
+                # ext = get_file_extension(files.filename)
+                filename = f"{uid}_{current_date_time()}"
+                s3bucket.put_object(Key=f'{key}/{filename}.jpg', Body=files, ContentType='image/jpeg',
+                                    ContentDisposition='inline', ACL='public-read')
+                key_loc.append(f'{filename}.jpg')
+            all_keys = [f"{base_url}{i}" for i in key_loc]
             return all_keys
         except Exception as er:
             print(f"Upload not working: {er}")

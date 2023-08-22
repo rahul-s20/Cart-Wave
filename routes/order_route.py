@@ -28,15 +28,18 @@ def update_orders(order_id):
 @token_required
 @cross_origin(origin=["*"], supports_credentials=True)
 def get_orders():
+    content = request.get_json(silent=True)
     token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
         'token')
-    res = get_all_orders(token=token)
+    if content is None:
+        res = get_all_orders(token=token)
+    else:
+        res = get_all_orders(token=token, data=content)
     return res
 
 
 @order_blueprint.route('/<order_id>', methods=['GET'])
 @token_required
-@cross_origin(origin=["*"], supports_credentials=True)
 def get_single_order(order_id):
     token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
         'token')

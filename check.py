@@ -32,9 +32,14 @@
 # print(shared_items)
 # a =1
 
-def chel():
-    global a
-    a = 13
-chel()
+# def chel():
+#     global a
+#     a = 13
+# chel()
+#
+# print(a)
 
-print(a)
+
+x = [1, 2, 3, 2, 0]
+for i in range(0, len(x)):
+    print(x[i])
