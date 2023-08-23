@@ -158,7 +158,7 @@ def delete_user_by_admin(token: str, user_id_update: str):
 
 def logout_user():
     response = make_response(jsonify({'success': True, 'message': 'Logged Out'}), 200)
-    response.set_cookie('token', None, expires=datetime.datetime.now(), domain=None,
+    response.set_cookie('token', 'None', expires=datetime.datetime.now(), domain=None,
                         secure=True, httponly=True, samesite='none')
     return response
 

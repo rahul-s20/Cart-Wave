@@ -1,5 +1,5 @@
 from flask import Blueprint, request, Response, make_response, jsonify
-from controllers.product_controller import ProductC, fetch_all_products
+from controllers.product_controller import ProductC, fetch_all_products, fetch_single_product
 from utils.tokenization import token_required
 from utils.helper import filter_objects
 from flask_cors import cross_origin
@@ -36,13 +36,16 @@ def create_new_product():
     return res
 
 
-@product_blueprint.route('/<product_id>', methods=['PUT', 'DELETE'])
+@product_blueprint.route('/<product_id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 @token_required
 def update_product(product_id):
     token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
         'token')
     if request.method == 'PUT':
         content = request.get_json(silent=True)
+        print(">>>>>>>>>>>>>>")
+        print(content)
         if content:
             filtered_data = filter_objects(content,
                                            {"name", "description", "price", "colors", "sizes", "company", "category",
@@ -97,10 +100,20 @@ def delete_product(product_id):
 
 
 @product_blueprint.route('/products', methods=['GET'])
-@token_required
 @cross_origin(origin=["*"], supports_credentials=True)
+@token_required
 def fetch_products():
     token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
         'token')
     res = fetch_all_products(token=token)
+    return res
+
+
+@product_blueprint.route('/products/<product_id>', methods=['GET'])
+@cross_origin(origin=["*"], supports_credentials=True)
+@token_required
+def fetch_single_prd(product_id):
+    token = request.headers.get('Authorization') if request.headers.get('Authorization') else request.cookies.get(
+        'token')
+    res = fetch_single_product(token=token, product_id=product_id)
     return res

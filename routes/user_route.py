@@ -34,6 +34,7 @@ def register():
 
 
 @user_blueprint.route('/logout', methods=['GET'])
+@cross_origin(origin=["*"], supports_credentials=True)
 @token_required
 def logout():
     res = logout_user()

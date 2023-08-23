@@ -26,9 +26,8 @@ class ProductC:
 
             else:
                 all_keys = self.s3_obj.upload_files_from_str(uid=decoded_token['sub'], files=data['images'],
-                                                    key='CART_WAVE_DEV/PRODUCTS',
-                                                    bucket_name=env['BUCKET'],
-                                                    base_url=env['OBJECT_BASE_URL'])
+                                                             key='CART_WAVE_DEV/PRODUCTS', bucket_name=env['BUCKET'],
+                                                             base_url=env['OBJECT_BASE_URL'])
             for i in all_keys:
                 objt = Image(public_id=i.split('/')[-1], url=i)
                 img_list.append(objt)
@@ -51,9 +50,8 @@ class ProductC:
             self.product_model.save()
             return make_response(jsonify({'success': True, 'data': "Product created successfully"}), 200)
         except Exception as er:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            raise er
-            # return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
+            print(er)
+            return make_response(jsonify({'success': False, 'data': f"{er}"}), 500)
 
     def update_product(self, prd_id: str, token: str, data: dict):
         img_list = list()
@@ -65,23 +63,28 @@ class ProductC:
                 find_product = Products.objects.filter(Q(id=ObjectId(prd_id)) & Q(is_active=True)).first()
                 if find_product is not None:
                     if data.__contains__('images'):
-                        if data['images']:
-                            all_keys = self.s3_obj.upload_files(uid=decoded_token['sub'], files=data['images'],
-                                                                key='CART_WAVE_DEV/PRODUCTS',
-                                                                bucket_name=env['BUCKET'],
-                                                                base_url=env['OBJECT_BASE_URL'])
-                            for i in all_keys:
-                                image_obj.public_id = i.split('/')[-1].replace('.', '')
-                                image_obj.url = i
-                                img_list.append(image_obj)
-                            find_product.images = all_keys
+                        for i in data['images']:
+                            if not i.__contains__('url'):
+                                print("xxxxxxxxxxxxxxxxxxxxxxxxx")
+                                print(i)
+                                all_keys = self.s3_obj.upload_files_from_str(uid=decoded_token['sub'], files=[i],
+                                                                             key='CART_WAVE_DEV/PRODUCTS',
+                                                                             bucket_name=env['BUCKET'],
+                                                                             base_url=env['OBJECT_BASE_URL'])
+                                for j in all_keys:
+                                    objt = Image(public_id=j.split('/')[-1], url=j)
+                                    img_list.append(objt)
+                            else:
+                                objt = Image(public_id=i['public_id'], url=i['url'])
+                                img_list.append(objt)
+                            find_product.images = img_list
 
                     for key, value in data.items():
                         if key == "colors":
-                            value = value.split(',')
+                            value = value.split(',') if isinstance(value, str) else value
                             setattr(find_product, key, value)
                         elif key == "sizes":
-                            value = value.split(',')
+                            value = value.split(',') if isinstance(value, str) else value
                             setattr(find_product, key, value)
                         elif key == "price":
                             value = float(value)
@@ -109,8 +112,7 @@ def fetch_all_products(token: str):
     else:
         return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
 
-
-    if len(all_prd)>0:
+    if len(all_prd) > 0:
         for i in all_prd:
             list_prods.append({
                 "id": str(i.id),
@@ -128,3 +130,16 @@ def fetch_all_products(token: str):
             })
 
     return make_response(jsonify({'success': True, 'data': list_prods}), 200)
+
+
+def fetch_single_product(token: str, product_id: str):
+    curr_users_prv, _id = check_user_privilege(token=token)
+
+    if curr_users_prv == 'super':
+        prd = Products.objects().filter(id=ObjectId(product_id)).first()
+    elif curr_users_prv in ['moderate', 'low']:
+        prd = Products.objects().filter(Q(id=ObjectId(product_id)) and Q(is_active=True)).first()
+    else:
+        return make_response(jsonify({'success': False, 'data': "Invalid: privilege invalid"}), 400)
+
+    return make_response(jsonify({'success': False, 'data': prd}), 200)
